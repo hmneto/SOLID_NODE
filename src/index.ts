@@ -1,5 +1,6 @@
 // const express = require('express')
 import express,  {Request,Response} from 'express';
+import mysql from 'mysql'
 const app = express();
 app.use(express.json())
 app.post("/transactions",function(req: Request, res: Response){
