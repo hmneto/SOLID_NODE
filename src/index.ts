@@ -14,9 +14,16 @@ const connection = mysql.createPool(db_config)
 
 const app = express();
 app.use(express.json())
-app.post("/transactions",function(req: Request, res: Response){
-    connection.query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}', '${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
+app.post("/transactions",async function(req: Request, res: Response){
+    connection.query(`INSERT INTO 
+    app.transaction (code, amount, number_installments, payment_method, date_timestamp) 
+    VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}',
+     '${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
     res.end();
+})
+
+app.get('/transactions/:code', async function(req: Request, res: Response){
+    connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`,(err, rows) => res.json(rows[0]))
 })
 app.listen(3000)
 
