@@ -23,3 +23,4 @@ app.listen(3000)
 //nodemon src/index.ts
 //npx jest
 //curl http://localhost:3000
+//npm i --save-dev @types/mysq
