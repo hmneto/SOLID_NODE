@@ -15,8 +15,7 @@ const connection = mysql.createPool(db_config)
 const app = express();
 app.use(express.json())
 app.post("/transactions",function(req: Request, res: Response){
-    connection.query("INSERT INTO `app.transaction` (`code`, `amount`, `number_installments`, `payment_method`, `date_timestamp`) VALUES ('1233', '123', '12', 'credit', CURRENT_TIMESTAMP);")
-    console.log(req.body)
+    connection.query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}', '${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
     res.end();
 })
 app.listen(3000)
