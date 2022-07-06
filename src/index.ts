@@ -27,8 +27,13 @@ const app = express();
 app.use(express.json())
 app.post("/transactions", async function (req: Request, res: Response) {
   await consulta_query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
-  const amount = Math.round(req.body.amount / req.body.numberInstallments*100)/100
+  let amount = Math.round(req.body.amount / req.body.numberInstallments*100)/100
+  let diff = Math.round((req.body.amount - amount*req.body.numberInstallments)*100)/100
+  console.log(diff)
   for (let i = 1; i <= req.body.numberInstallments; i++) {
+    if(i == req.body.numberInstallments){
+      amount += diff
+    }
     await consulta_query(`INSERT INTO app.installment (code, number, amount) VALUES ('${req.body.code}','${i}', '${amount}')`)
   }
   res.end();
@@ -41,7 +46,6 @@ app.get('/transactions/:code', async function (req: Request, res: Response) {
   const linha = linhas[0] != linhas || linhas[0] != undefined ? linhas[0] : null;
   linha.PaymentMethod = linhas[0].payment_method
   linha.Installments = await consulta_query(`select * from app.installment where code = ${req.params.code}`)
-  console.log(linha)
   res.json(linha)
 })
 app.listen(3000)
