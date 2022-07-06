@@ -23,6 +23,7 @@ const consulta_query: any = function (query: string) {
   })
 }
 
+
 const app = express();
 app.use(express.json())
 app.post("/transactions", async function (req: Request, res: Response) {
