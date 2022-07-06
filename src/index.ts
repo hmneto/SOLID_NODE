@@ -10,16 +10,11 @@ var db_config = {
 };
 const connection = mysql.createPool(db_config)
 
-const consulta_query = function (query: string) {
+const consulta_query : any = function (query: string) {
   return new Promise(function (resolve, reject) {
     try {
       connection.query(query, (err, rows) => {
-        if (rows == undefined)
-          throw 'erro'
-        const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;
-        row.PaymentMethod = row.payment_method
-        console.log(row)
-        resolve(row)
+          resolve(rows)
       })
     } catch (error) {
       reject(error)
@@ -31,12 +26,11 @@ const app = express();
 app.use(express.json())
 app.post("/transactions", async function (req: Request, res: Response) {
 
-  connection.query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
+  await consulta_query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
 
   const amount = req.body.amount - req.body.numberInstallments
   for (let i = 0; i <= req.body.numberInstallment; i++) {
-    connection.query(`INSERT INTO installment (code, number, amount)
-      VALUES ('${req.body.code}',', '${i}',', '${amount}');`)
+    await consulta_query(`INSERT INTO installment (code, number, amount) VALUES ('${req.body.code}',', '${i}',', '${amount}');`)
   }
   res.end();
 })
@@ -44,8 +38,14 @@ app.post("/transactions", async function (req: Request, res: Response) {
 app.get('/transactions/:code', async function (req: Request, res: Response) {
 
   const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`)
+ 
+  if (linhas == undefined)
+  throw 'erro'
+  const linha = linhas[0] != linhas || linhas[0] != undefined ? linhas[0] : null;
+  linha.PaymentMethod = linhas[0].payment_method
 
-  res.json(linhas)
+  console.log(linha)
+  res.json(linha)
 
 })
 app.listen(3000)
