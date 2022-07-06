@@ -25,9 +25,7 @@ const consulta_query : any = function (query: string) {
 const app = express();
 app.use(express.json())
 app.post("/transactions", async function (req: Request, res: Response) {
-
   await consulta_query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
-
   const amount = req.body.amount - req.body.numberInstallments
   for (let i = 0; i <= req.body.numberInstallment; i++) {
     await consulta_query(`INSERT INTO installment (code, number, amount) VALUES ('${req.body.code}',', '${i}',', '${amount}');`)
@@ -36,17 +34,12 @@ app.post("/transactions", async function (req: Request, res: Response) {
 })
 
 app.get('/transactions/:code', async function (req: Request, res: Response) {
-
   const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`)
- 
   if (linhas == undefined)
   throw 'erro'
   const linha = linhas[0] != linhas || linhas[0] != undefined ? linhas[0] : null;
   linha.PaymentMethod = linhas[0].payment_method
-
-  console.log(linha)
   res.json(linha)
-
 })
 app.listen(3000)
 
