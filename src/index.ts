@@ -10,7 +10,22 @@ var db_config = {
 };
 const connection = mysql.createPool(db_config)
 
-// const consulta
+const consulta_query = function (query: string) {
+  return new Promise(function (resolve, reject) {
+    try {
+      connection.query(query, (err, rows) => {
+        if (rows == undefined)
+          throw 'erro'
+        const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;
+        row.PaymentMethod = row.payment_method
+        console.log(row)
+        resolve(row)
+      })
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 const app = express();
 app.use(express.json())
@@ -28,29 +43,9 @@ app.post("/transactions", async function (req: Request, res: Response) {
 
 app.get('/transactions/:code', async function (req: Request, res: Response) {
 
-  const promisse_query = function () {
-    return new Promise(function (resolve, reject) {
-      try {
-        connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`, (err, rows) => {
-          if (rows == undefined)
-            return res.send('retorno do banco undefined')
-          const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;
-          row.PaymentMethod = row.payment_method
-          console.log(row)
-          resolve(row)
-        })
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-
-  const linhas = await promisse_query()
+  const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`)
 
   res.json(linhas)
-
-
 
 })
 app.listen(3000)
