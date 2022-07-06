@@ -1,35 +1,57 @@
 // const express = require('express')
-import express,  {Request,Response} from 'express';
+import express, { Request, Response } from 'express';
 import mysql from 'mysql'
 
 var db_config = {
-  host:'localhost',
+  host: 'localhost',
   user: 'root',
   password: 'usbw',
   port: 3306
 };
 const connection = mysql.createPool(db_config)
 
-
+// const consulta
 
 const app = express();
 app.use(express.json())
-app.post("/transactions",async function(req: Request, res: Response){
-    connection.query(`INSERT INTO 
-    app.transaction (code, amount, number_installments, payment_method, date_timestamp) 
-    VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}',
-     '${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
-    res.end();
+app.post("/transactions", async function (req: Request, res: Response) {
+
+  connection.query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
+
+  const amount = req.body.amount - req.body.numberInstallments
+  for (let i = 0; i <= req.body.numberInstallment; i++) {
+    connection.query(`INSERT INTO installment (code, number, amount)
+      VALUES ('${req.body.code}',', '${i}',', '${amount}');`)
+  }
+  res.end();
 })
 
-app.get('/transactions/:code', async function(req: Request, res: Response){
-    connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`,(err, rows) => {
-      if(rows == undefined)
-        return res.send('retorno do banco undefined')
-        const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;       
-        row.PaymentMethod = row.payment_method
-        res.json(row)
+app.get('/transactions/:code', async function (req: Request, res: Response) {
+
+  const promisse_query = function () {
+    return new Promise(function (resolve, reject) {
+      try {
+        connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`, (err, rows) => {
+          if (rows == undefined)
+            return res.send('retorno do banco undefined')
+          const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;
+          row.PaymentMethod = row.payment_method
+          console.log(row)
+          resolve(row)
+        })
+      } catch (error) {
+        reject(error)
+      }
     })
+  }
+
+
+  const linhas = await promisse_query()
+
+  res.json(linhas)
+
+
+
 })
 app.listen(3000)
 
