@@ -29,7 +29,6 @@ app.post("/transactions", async function (req: Request, res: Response) {
   await consulta_query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
   let amount = Math.round(req.body.amount / req.body.numberInstallments*100)/100
   let diff = Math.round((req.body.amount - amount*req.body.numberInstallments)*100)/100
-  console.log(diff)
   for (let i = 1; i <= req.body.numberInstallments; i++) {
     if(i == req.body.numberInstallments){
       amount += diff
