@@ -23,7 +23,13 @@ app.post("/transactions",async function(req: Request, res: Response){
 })
 
 app.get('/transactions/:code', async function(req: Request, res: Response){
-    connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`,(err, rows) => res.json(rows[0]))
+    connection.query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`,(err, rows) => {
+      if(rows == undefined)
+        return res.send('retorno do banco undefined')
+        const row = rows[0] != null || rows[0] != undefined ? rows[0] : null;       
+        row.PaymentMethod = row.payment_method
+        res.json(row)
+    })
 })
 app.listen(3000)
 
