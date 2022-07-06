@@ -18,7 +18,7 @@ const consulta_query: any = function (query: string) {
         resolve(rows)
       })
     } catch (error) {
-      console.log(error)
+      reject(error)
     }
   })
 }
@@ -35,7 +35,7 @@ app.post("/transactions", async function (req: Request, res: Response) {
 })
 
 app.get('/transactions/:code', async function (req: Request, res: Response) {
-  const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code} LIMIT 1`)
+  const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code}`)
   if (linhas == undefined)
     throw 'erro'
   const linha = linhas[0] != linhas || linhas[0] != undefined ? linhas[0] : null;
