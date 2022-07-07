@@ -1,6 +1,8 @@
 // const express = require('express')
 import express, { Request, Response } from 'express';
 import mysql from 'mysql'
+import CreateTransaction from './application/CreateTransaction';
+import GetTransaction from './application/GetTransaction';
 
 var db_config = {
   host: 'localhost',
@@ -10,7 +12,7 @@ var db_config = {
 };
 const connection = mysql.createPool(db_config)
 
-const consulta_query: any = function (query: string) {
+function consulta_query (query: string) {
   return new Promise(function (resolve, reject) {
     try {
       connection.query(query, (err, rows) => {
@@ -27,28 +29,20 @@ const consulta_query: any = function (query: string) {
 const app = express();
 app.use(express.json())
 app.post("/transactions", async function (req: Request, res: Response) {
-  await consulta_query(`INSERT INTO app.transaction (code, amount, number_installments, payment_method, date_timestamp) VALUES ('${req.body.code}', '${req.body.amount}', '${req.body.numberInstallments}','${req.body.PaymentMethod}', CURRENT_TIMESTAMP);`)
-  let amount = Math.round(req.body.amount / req.body.numberInstallments*100)/100
-  let diff = Math.round((req.body.amount - amount*req.body.numberInstallments)*100)/100
-  for (let i = 1; i <= req.body.numberInstallments; i++) {
-    if(i == req.body.numberInstallments){
-      amount += diff
-    }
-    await consulta_query(`INSERT INTO app.installment (code, number, amount) VALUES ('${req.body.code}','${i}', '${amount}')`)
-  }
+  const createTransaction = new CreateTransaction()
+  await createTransaction.execute(req.body)
   res.end();
 })
 
 app.get('/transactions/:code', async function (req: Request, res: Response) {
-  const linhas = await consulta_query(`select * from app.transaction where code = ${req.params.code}`)
-  if (linhas == undefined)
-    throw 'erro'
-  const linha = linhas[0] != linhas || linhas[0] != undefined ? linhas[0] : null;
-  linha.PaymentMethod = linhas[0].payment_method
-  linha.Installments = await consulta_query(`select * from app.installment where code = ${req.params.code}`)
+  console.log(req.params)
+  const getTransaction = new GetTransaction()
+  const linha = await getTransaction.execute(req.params.code)
+  console.log(linha)
   res.json(linha)
 })
 app.listen(3000)
+
 
 
 
